@@ -1,75 +1,63 @@
 <template>
   <div class="container">
-    <div>
-      <Logo />
-      <h1 class="title">
-        nuxt-sample
-      </h1>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--grey"
-        >
-          GitHub
-        </a>
-      </div>
-    </div>
+    <ul v-for="user in data.users" :key="user.id">
+      <li>ID: {{ user.id }}</li>
+      <li>NAME: {{ user.nickname }}</li>
+    </ul>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import { Context, NuxtError } from '@nuxt/types'
+import { AxiosResponse, AxiosError } from 'axios';
+const axios = require('axios');
+require('dotenv').config();
+const url = process.env.REMO_URL;
+const apiKey = process.env.REMO_KEY;
 
-export default Vue.extend({})
+export default {
+  asyncData({ params, error }: Context): Promise<object> {
+    return axios.get(url, {
+      headers: {
+        Authorization: "Bearer " + apiKey,
+        Accept: "application/json",
+        "Content-Type": "application/json:charset=utf-8"
+      }
+    })
+    .then((res: AxiosResponse) => {
+      return { data: res.data[0] };
+    })
+    .catch((e: AxiosError) => {
+      error({ statusCode: e.response !== undefined ? e.response.status : undefined, message: e.message })
+    })
+  }
+}
+// const getData = async () => {
+//   const url = 'https://api.nature.global/1/devices';
+//   const headers = {
+//     headers: {
+//       Authorization: "Bearer " + apiKey,
+//       Accept: "application/json",
+//       "Content-Type": "application/json:charset=utf-8"
+//     }
+//   };
+//   const res = await fetch(url, headers);
+//   const data = await res.json();
+//   console.log(data[0]);
+// };
+// getData();
+
+// const delayFunc = () => {
+//   return new Promise((resolve, reject) => {
+//     setTimeout(() => {
+//       resolve('Hello World');
+//     }, 3000)
+//   });
+// }
+// delayFunc().then(value => console.log(value));
 </script>
 
 <style>
-.container {
-  margin: 0 auto;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
 
-.title {
-  font-family:
-    'Quicksand',
-    'Source Sans Pro',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
-}
 </style>
